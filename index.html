@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Zeeshan ✨</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #030712; color: #fff; overflow-x: hidden; min-height: 100vh; }
+    
+    .screen {
+      display: none; width: 100vw; min-height: 100vh; position: fixed; top: 0; left: 0;
+      flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      padding: 20px; z-index: 10; background: #030712; overflow-y: auto;
+    }
+    .screen.active { display: flex; animation: fadeIn 0.8s ease-in-out; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+    /* Common Buttons */
+    .btn-main {
+      margin-top: 25px; padding: 14px 32px; background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      border: none; border-radius: 30px; color: #fff; font-size: 16px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); transition: 0.3s;
+    }
+    .btn-main:hover { transform: translateY(-3px); box-shadow: 0 0 25px rgba(37, 99, 235, 0.8); }
+
+    /* Screen 1: Welcome */
+    .glowing-heart {
+      width: 120px; height: 120px; background: #2563eb; transform: rotate(-45deg);
+      position: relative; animation: pulse 1.5s infinite; margin: 40px auto;
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      box-shadow: 0 0 40px #2563eb;
+    }
+    .glowing-heart::before, .glowing-heart::after {
+      content: ''; width: 120px; height: 120px; background: #2563eb;
+      border-radius: 50%; position: absolute;
+    }
+    .glowing-heart::before { top: -60px; left: 0; }
+    .glowing-heart::after { left: 60px; top: 0; }
+    .heart-btn {
+      transform: rotate(45deg); z-index: 2; color: #fff; font-weight: bold; font-size: 14px; letter-spacing: 1px;
+    }
+    @keyframes pulse { 0%, 100% { transform: rotate(-45deg) scale(1); } 50% { transform: rotate(-45deg) scale(1.1); } }
+
+    /* Screen 3: Passcode */
+    .passcode-card {
+      background: #111827; padding: 25px; border-radius: 20px; border: 1px solid #1f2937;
+      display: flex; gap: 30px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: 650px;
+    }
+    .passcode-card img { width: 180px; height: 180px; object-fit: cover; border-radius: 12px; }
+    .dots { display: flex; gap: 10px; margin: 15px 0; justify-content: center; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: #374151; }
+    .dot.active { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 180px; margin: 0 auto; }
+    .keypad button {
+      width: 50px; height: 50px; border-radius: 50%; border: none; background: #1f2937;
+      color: #fff; font-size: 18px; cursor: pointer; transition: 0.2s;
+    }
+    .keypad button:active { background: #3b82f6; }
+
+    /* Screen 6: Envelope */
+    .envelope-box {
+      width: 200px; height: 130px; background: #2563eb; border-radius: 8px;
+      position: relative; margin: 30px auto; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Screen 7: Cake & Candles */
+    .cake-container { position: relative; width: 220px; height: 180px; margin: 20px auto; }
+    .cake-layer {
+      width: 200px; height: 70px; background: #f43f5e; border-radius: 10px 10px 0 0;
+      position: absolute; bottom: 0; left: 10px; box-shadow: inset 0 -10px 0 #e11d48;
+    }
+    .cake-layer-top {
+      width: 160px; height: 50px; background: #fb7185; border-radius: 10px 10px 0 0;
+      position: absolute; bottom: 70px; left: 30px;
+    }
+    .candles-group { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-evenly; }
+    .candle { width: 8px; height: 40px; background: #fef08a; position: relative; }
+    .flame {
+      width: 12px; height: 18px; background: #f97316; border-radius: 50% 50% 20% 20%;
+      position: absolute; top: -18px; left: -2px; box-shadow: 0 0 10px #f97316; animation: flicker 0.2s infinite alternate;
+    }
+    .flame.off { display: none; }
+    @keyframes flicker { 0% { opacity: 0.8; } 100% { opacity: 1; transform: scale(1.1); } }
+    .knife {
+      position: absolute; width: 80px; height: 12px; background: #9ca3af; border-radius: 0 6px 6px 0;
+      top: 50%; left: -100px; transition: transform 0.1s; display: none; cursor: grab; z-index: 15;
+    }
+
+    /* Screen 8: Gifts */
+    .gifts-row { display: flex; gap: 20px; margin-top: 20px; }
+    .gift-box { font-size: 50px; cursor: pointer; transition: 0.3s; }
+    .gift-box:hover { transform: scale(1.2); }
+
+    /* Screen 9: Scratch Cards */
+    .scratch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+    .scratch-card { position: relative; width: 130px; height: 130px; border-radius: 10px; overflow: hidden; }
+    .scratch-card img { width: 100%; height: 100%; object-fit: cover; }
+    .scratch-card canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; }
+
+    /* Screen 12: Balloons */
+    .balloons-container { display: flex; gap: 20px; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
+    .balloon {
+      width: 60px; height: 75px; background: #ec4899; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px;
+      animation: float 2s infinite ease-in-out alternate;
+    }
+    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
+
+    /* Screen 13: 3x3 Hearts */
+    .hearts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+    .heart-cell {
+      width: 70px; height: 70px; background: #1f2937; border-radius: 12px; display: flex;
+      align-items: center; justify-content: center; font-size: 28px; cursor: pointer; border: 1px solid #374151;
+    }
+
+    .typewriter-box { font-family: monospace; font-size: 18px; color: #60a5fa; max-width: 80%; line-height: 1.6; min-height: 50px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. WELCOME SCREEN -->
+  <div class="screen active" id="screen-1">
+    <h1>WELCOME ZEESHAAN ✨</h1>
+    <div class="glowing-heart" onclick="nextScreen(2)">
+      <span class="heart-btn">CONTINUE →</span>
+    </div>
+  </div>
+
+  <!-- 2. BIRTHDAY INTRO -->
+  <div class="screen" id="screen-2">
+    <h1 style="font-size: 36px; color: #60a5fa;">Happy Birthday Zeeshan ✨</h1>
+    <p style="margin-top: 10px; color: #9ca3af;">A small universe built with love, just for you.</p>
+    <button class="btn-main" onclick="nextScreen(3)">ENTER THE SURPRISE →</button>
+  </div>
+
+  <!-- 3. PASSCODE -->
+  <div class="screen" id="screen-3">
+    <div class="passcode-card">
+      <div>
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=400" alt="Hand Holding">
+        <p style="margin-top: 10px;">Our Special Bond ❤️</p>
+      </div>
+      <div>
+        <h2>Enter Passcode 😄</h2>
+        <div class="dots">
+          <div class="dot" id="dot0"></div>
+          <div class="dot" id="dot1"></div>
+          <div class="dot" id="dot2"></div>
+          <div class="dot" id="dot3"></div>
+        </div>
+        <div class="keypad">
+          <button onclick="pressKey('1')">1</button>
+          <button onclick="pressKey('2')">2</button>
+          <button onclick="pressKey('3')">3</button>
+          <button onclick="pressKey('4')">4</button>
+          <button onclick="pressKey('5')">5</button>
+          <button onclick="pressKey('6')">6</button>
+          <button onclick="pressKey('7')">7</button>
+          <button onclick="pressKey('8')">8</button>
+          <button onclick="pressKey('9')">9</button>
+          <button style="grid-column: 2" onclick="pressKey('0')">0</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MAGICAL BLUE PARTICLE HEART -->
+  <div class="screen" id="screen-4">
+    <canvas id="blueHeartCanvas" width="300" height="300"></canvas>
+    <div class="typewriter-box" id="tw-screen4"></div>
+    <button class="btn-main" onclick="nextScreen(5)">Next Surprise →</button>
+  </div>
+
+  <!-- 5. MULTI-COLOR RAY HEART -->
+  <div class="screen" id="screen-5">
+    <canvas id="rayHeartCanvas" width="300" height="300"></canvas>
+    <div class="typewriter-box" id="tw-screen5"></div>
+    <button class="btn-main" onclick="nextScreen(6)">Next Surprise →</button>
+  </div>
+
+  <!-- 6. ENVELOPE -->
+  <div class="screen" id="screen-6">
+    <h2>A Little Something For You 💌</h2>
+    <div class="envelope-box" onclick="openEnvelope()">✉️</div>
+    <p id="envelope-text" style="display:none; max-width: 400px; color: #93c5fd;">
+      "You bring so much light into my life. Every single moment spent with you feels like magic."
+    </p>
+    <button class="btn-main" id="env-next" style="display:none;" onclick="nextScreen(7)">Continue →</button>
+  </div>
+
+  <!-- 7. CAKE & CUTTING -->
+  <div class="screen" id="screen-7">
+    <h2>Make A Wish 🎂</h2>
+    <div class="cake-container" id="cake">
+      <div class="candles-group">
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+      </div>
+      <div class="cake-layer-top"></div>
+      <div class="cake-layer"></div>
+      <div class="knife" id="knife">🔪</div>
+    </div>
+    <p id="cake-status" style="margin-top: 15px; color: #f43f5e;">Blow into your mic or click below to blow candles!</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-main" onclick="blowCandles()">BLOW CANDLES 🌬️</button>
+      <button class="btn-main" id="cut-btn" style="display:none;" onclick="startCakeCut()">CUT CAKE 🔪</button>
+    </div>
+    <button class="btn-main" id="cake-next" style="display:none;" onclick="nextScreen(8)">Three Surprises →</button>
+  </div>
+
+  <!-- 8. THREE GIFTS -->
+  <div class="screen" id="screen-8">
+    <h2>Three Little Surprises 🎁</h2>
+    <div class="gifts-row">
+      <div class="gift-box" onclick="openGift(this, '💋 Big Kiss!')">🎁</div>
+      <div class="gift-box" onclick="openGift(this, '🤗 Warm Hug!')">🎀</div>
+      <div class="gift-box" onclick="openGift(this, '💋 Sweet Lips Surprise!')">💝</div>
+    </div>
+    <h3 id="gift-msg" style="margin-top: 25px; color: #ec4899; min-height: 30px;"></h3>
+    <button class="btn-main" onclick="nextScreen(9)">Our Memories →</button>
+  </div>
+
+  <!-- 9. SCRATCH-TO-REVEAL MEMORIES -->
+  <div class="screen" id="screen-9">
+    <h2>Our Memories 📸</h2>
+    <p style="color: #9ca3af; font-size: 14px;">Scratch the cards using your touch/mouse to reveal pictures!</p>
+    <div class="scratch-grid">
+      <div class="scratch-card"><img src="https://picsum.photos/200?random=1"><canvas></canvas></div>
+      <div class="scratch-card"><img src="https://picsum.photos/200?random=2"><canvas></canvas></div>
+      <div class="scratch-card"><img src="https://picsum.photos/200?random=3"><canvas></canvas></div>
+      <div class="scratch-card"><img src="https://picsum.photos/200?random=4"><canvas></canvas></div>
+    </div>
+    <button class="btn-main" onclick="nextScreen(10)">Video Surprise →</button>
+  </div>
+
+  <!-- 10. HAND-HOLDING VIDEO -->
+  <div class="screen" id="screen-10">
+    <h2>One Little Moment 🎥</h2>
+    <div style="width: 280px; height: 180px; background: #1f2937; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 20px auto;" id="video-placeholder">
+      <button class="btn-main" onclick="revealVideo()">TAP TO REVEAL VIDEO 🎬</button>
+    </div>
+    <video id="hand-video" width="280" controls style="display:none; border-radius: 12px;">
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+    </video>
+    <button class="btn-main" onclick="nextScreen(11)">A Birthday Letter →</button>
+  </div>
+
+  <!-- 11. LONG BIRTHDAY WISH -->
+  <div class="screen" id="screen-11">
+    <h2>A Birthday Letter 💌</h2>
+    <div class="typewriter-box" id="tw-letter" style="text-align: left; margin-top: 20px;"></div>
+    <button class="btn-main" onclick="nextScreen(12)">Why You're Special →</button>
+  </div>
+
+  <!-- 12. WHY YOU'RE SPECIAL -->
+  <div class="screen" id="screen-12">
+    <h2>Why You're Special? 🎈</h2>
+    <p style="color:#9ca3af;">Pop the balloons to see reasons!</p>
+    <div class="balloons-container">
+      <div class="balloon" onclick="popBalloon(this, 'Because you make ordinary moments feel special ✨')">🎈</div>
+      <div class="balloon" onclick="popBalloon(this, 'Your smile lights up my darkest days 🌟')">🎈</div>
+      <div class="balloon" onclick="popBalloon(this, 'You always understand me without words 💙')">🎈</div>
+    </div>
+    <h3 id="reason-text" style="margin-top: 25px; color: #38bdf8; min-height: 40px;"></h3>
+    <button class="btn-main" onclick="nextScreen(13)">Nine Hidden Hearts →</button>
+  </div>
+
+  <!-- 13. NINE HIDDEN HEARTS -->
+  <div class="screen" id="screen-13">
+    <h2>Nine Little Things 💗</h2>
+    <div class="hearts-grid">
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Happiness')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Safe Space')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Best Friend')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Support')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Sunshine')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Everything')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Smile')">💗</div>
+      <div class="heart-cell" onclick="openHeartCell(this, 'My Partner')">💗</div>
+      <div class="heart-cell" onclick="open9thHeart(this)">💖</div>
+    </div>
+    <h3 id="heart-msg" style="margin-top: 20px; color: #f472b6;"></h3>
+    <button class="btn-main" id="screen13-next" style="display:none;" onclick="nextScreen(14)">Full Experience →</button>
+  </div>
+
+  <!-- 14. FULL-SCREEN EXPERIENCE -->
+  <div class="screen" id="screen-14">
+    <h1 style="font-size: 32px; color: #38bdf8;">I LOVE YOU ZEEEEEESHAN</h1>
+    <h2 style="margin-top: 20px; color: #f43f5e;">Happy Birthday Again, Zeeshan 🎂✨</h2>
+    <button class="btn-main" onclick="nextScreen(15)">Celebrate Again 🎉</button>
+  </div>
+
+  <!-- 15. CELEBRATE AGAIN -->
+  <div class="screen" id="screen-15">
+    <button class="btn-main" style="font-size: 22px;" onclick="triggerMassiveConfetti()">CELEBRATE AGAIN 🎉</button>
+    <button class="btn-main" style="margin-top: 30px; background: #374151;" onclick="nextScreen(16)">Final Words →</button>
+  </div>
+
+  <!-- 16. FINAL ENDING -->
+  <div class="screen" id="screen-16">
+    <h1 style="color: #60a5fa;">Happy Birthday Zeeshan ✨</h1>
+    <p style="margin-top: 30px; font-style: italic; color: #9ca3af;">Prepared by Zeeshan k Baby (T.A) ✨</p>
+  </div>
+
+  <script>
+    // Navigation Control
+    function nextScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`screen-${id}`);
+      target.classList.add('active');
+
+      if (id === 4) initBlueHeart();
+      if (id === 5) initRayHeart();
+      if (id === 9) initScratchCards();
+      if (id === 11) startLetterTypewriter();
+    }
+
+    // Passcode Logic
+    let passcode = "";
+    function pressKey(num) {
+      if (passcode.length < 4) {
+        passcode += num;
+        document.getElementById(`dot${passcode.length - 1}`).classList.add('active');
+        if (passcode.length === 4) {
+          if (passcode === "2917") {
+            setTimeout(() => nextScreen(4), 300);
+          } else {
+            alert("Incorrect Passcode! Try again.");
+            passcode = "";
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+          }
+        }
+      }
+    }
+
+    // Canvas 1: Blue Heart
+    function initBlueHeart() {
+      const cvs = document.getElementById('blueHeartCanvas');
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, 300, 300);
+      ctx.fillStyle = "#3b82f6";
+      for(let i=0; i<200; i++) {
+        let t = Math.random() * Math.PI * 2;
+        let x = 150 + 8 * (16 * Math.pow(Math.sin(t), 3));
+        let y = 140 - 8 * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2); ctx.fill();
+      }
+      typewriter('tw-screen4', 'happy birthday zeeshan');
+    }
+
+    // Canvas 2: Multi-color Ray Heart
+    function initRayHeart() {
+      const cvs = document.getElementById('rayHeartCanvas');
+      const ctx = cvs.getContext('2d');
+      const colors = ["red", "blue", "lime", "yellow", "cyan", "magenta", "orange", "pink"];
+      ctx.clearRect(0, 0, 300, 300);
+      for(let i=0; i<80; i++) {
+        let t = i * (Math.PI * 2) / 80;
+        let x = 150 + 7 * (16 * Math.pow(Math.sin(t), 3));
+        let y = 140 - 7 * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.beginPath(); ctx.moveTo(150, 140); ctx.lineTo(x, y); ctx.stroke();
+      }
+      typewriter('tw-screen5', 'I love you Zeeeeeeeeeeeeeeeshan');
+    }
+
+    // Envelope Logic
+    function openEnvelope() {
+      document.getElementById('envelope-text').style.display = 'block';
+      document.getElementById('env-next').style.display = 'inline-block';
+    }
+
+    // Candle & Cake Cutting Logic
+    function blowCandles() {
+      document.querySelectorAll('.flame').forEach(f => f.classList.add('off'));
+      document.getElementById('cake-status').innerText = "Candles Off! Now cut the cake 🎂";
+      document.getElementById('cut-btn').style.display = 'inline-block';
+      confetti({ particleCount: 50, spread: 60 });
+    }
+
+    function startCakeCut() {
+      const knife = document.getElementById('knife');
+      knife.style.display = 'block';
+      knife.style.transform = 'translate(100px, -20px) rotate(-30deg)';
+      setTimeout(() => {
+        knife.style.transform = 'translate(100px, 30px) rotate(0deg)';
+        document.getElementById('cake-status').innerText = "Cake Cut Successfully! 🎉";
+        document.getElementById('cake-next').style.display = 'inline-block';
+        confetti({ particleCount: 100, spread: 70 });
+      }, 500);
+    }
+
+    // Gift Box Logic
+    function openGift(el, msg) {
+      el.innerText = '💥';
+      document.getElementById('gift-msg').innerText = msg;
+      confetti({ particleCount: 30, spread: 40 });
+    }
+
+    // Scratch Cards Logic
+    function initScratchCards() {
+      document.querySelectorAll('.scratch-card').forEach(card => {
+        const cvs = card.querySelector('canvas');
+        cvs.width = 130; cvs.height = 130;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle = '#6b7280'; ctx.fillRect(0, 0, 130, 130);
+        
+        let isDrawing = false;
+        function scratch(e) {
+          if (!isDrawing) return;
+          const rect = cvs.getBoundingClientRect();
+          const x = (e.clientX || e.touches[0].clientX) - rect.left;
+          const y = (e.clientY || e.touches[0].clientY) - rect.top;
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
+        }
+
+        cvs.addEventListener('mousedown', () => isDrawing = true);
+        cvs.addEventListener('mouseup', () => isDrawing = false);
+        cvs.addEventListener('mousemove', scratch);
+        cvs.addEventListener('touchstart', () => isDrawing = true);
+        cvs.addEventListener('touchend', () => isDrawing = false);
+        cvs.addEventListener('touchmove', scratch);
+      });
+    }
+
+    // Video Reveal
+    function revealVideo() {
+      document.getElementById('video-placeholder').style.display = 'none';
+      const v = document.getElementById('hand-video');
+      v.style.display = 'block'; v.play();
+    }
+
+    // Typewriter Helper
+    function typewriter(id, text) {
+      let el = document.getElementById(id);
+      el.innerText = ""; let i = 0;
+      let timer = setInterval(() => {
+        if (i < text.length) { el.innerText += text.charAt(i); i++; }
+        else clearInterval(timer);
+      }, 80);
+    }
+
+    function startLetterTypewriter() {
+      typewriter('tw-letter', "Dearest Zeeshan,\n\nOn your special day, I want to remind you how deeply loved and cherished you are. Every day with you is a gift, and I am so grateful for all our sweet memories. May this year bring you endless happiness and success.\n\nAlways yours ❤️");
+    }
+
+    // Balloons Logic
+    function popBalloon(el, reason) {
+      el.style.visibility = 'hidden';
+      document.getElementById('reason-text').innerText = reason;
+      confetti({ particleCount: 40, spread: 50 });
+    }
+
+    // 3x3 Hearts Logic
+    function openHeartCell(el, text) {
+      el.innerText = '✨';
+      document.getElementById('heart-msg').innerText = text;
+    }
+
+    function open9thHeart(el) {
+      el.innerText = '💥';
+      document.getElementById('heart-msg').innerText = "BIG HEART PARTICLE EXPLOSION! 💗💗💗";
+      triggerMassiveConfetti();
+      document.getElementById('screen13-next').style.display = 'inline-block';
+    }
+
+    // Mass Confetti Celebration
+    function triggerMassiveConfetti() {
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+    }
+  </script>
+</body>
+</html>
